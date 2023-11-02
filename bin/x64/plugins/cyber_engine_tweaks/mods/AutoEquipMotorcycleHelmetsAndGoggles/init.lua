@@ -19,16 +19,17 @@ registerForEvent("onInit", function ()
 	
 	local transmog = false
 	local lastItemId = nil
+	local lastTransmogId = nil
 
 	Observe("MotorcycleComponent", "OnMountingEvent", function ()
 		local player, transactionSystem, playerData = getMetadata()
+
 		transmog = playerData:IsVisualSetActive()
+		lastItemId = playerData:GetItemInEquipSlot(slot, 0)
 
 		if transmog then
-			lastItemId = playerData:GetVisualItemInSlot(slot)
+			lastTransmogId = playerData:GetVisualItemInSlot(slot)
 			playerData:UnequipVisuals(slot)
-		else
-			lastItemId = playerData:GetItemInEquipSlot(slot, 0)
 		end
 
 		transactionSystem:GiveItem(player, clothingItemId, 1)
@@ -40,11 +41,11 @@ registerForEvent("onInit", function ()
 		
 		playerData:UnequipItem(clothingItemId)
 		transactionSystem:RemoveItem(player, clothingItemId, 1)
-
+		
 		if transmog then
-			playerData:EquipVisuals(lastItemId)
-		else 
-			playerData:EquipItem(lastItemId)
+			playerData:EquipVisuals(lastTransmogId)
 		end
+
+		playerData:EquipItem(lastItemId)
 	end)
 end)
