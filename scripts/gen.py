@@ -68,6 +68,5 @@ for m in metadata:
     type_descriptor = ET.SubElement(plugin, 'typeDescriptor')
     ET.SubElement(type_descriptor, 'type', {'name': 'Optional'})
     
-
-ET.indent(tree)
+ET.indent(tree, space="    ")
 tree.write(MODULECONFIG_DIR)
