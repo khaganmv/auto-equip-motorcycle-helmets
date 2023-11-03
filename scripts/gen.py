@@ -47,7 +47,9 @@ for opt in opts.findall('plugin'):
 for m in metadata:
     subdir = m.split('.')[1] + '/'
     
-    plugin = ET.SubElement(opts, 'plugin', {'name': m.split('.')[1]})
+    plugin = ET.SubElement(opts, 'plugin', {
+        'name': subdir[:-1] + ' (Requires XRX Helmet)' if 'xrx' in subdir else subdir[:-1]
+    })
     ET.SubElement(plugin, 'description')
     ET.SubElement(plugin, 'image', {'path': CONFIGS_DIR + subdir + subdir[:-1] + '.jpg'})
     

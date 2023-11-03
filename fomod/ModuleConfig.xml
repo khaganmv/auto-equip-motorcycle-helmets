@@ -588,6 +588,17 @@
                 <type name="Optional" />
               </typeDescriptor>
             </plugin>
+            <plugin name="xrxbiker_xr (Requires XRX Helmet)">
+              <description />
+              <image path="configs/xrxbiker_xr/xrxbiker_xr.jpg" />
+              <files>
+                <folder source="bin" destination="bin" priority="0" />
+                <folder source="configs/xrxbiker_xr/bin" destination="bin" priority="0" />
+              </files>
+              <typeDescriptor>
+                <type name="Optional" />
+              </typeDescriptor>
+            </plugin>
           </plugins>
         </group>
       </optionalFileGroups>
