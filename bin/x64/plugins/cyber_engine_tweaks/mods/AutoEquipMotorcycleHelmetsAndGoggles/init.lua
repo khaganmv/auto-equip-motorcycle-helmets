@@ -1,4 +1,4 @@
-local config = require("config")
+local file = require("file")
 
 function getMetadata()
 	local player = Game.GetPlayer()
@@ -13,25 +13,20 @@ function getMetadata()
 end
 
 registerForEvent("onInit", function ()
-	local d = config.readJSON("config.json")
-	local clothingTDBId, slot = d["TDBId"], d["slot"]
+	local config = file.readJSON("config.json")
+	local clothingTDBId, slot = config["TDBId"], config["slot"]
 	local clothingItemId = ItemID.FromTDBID(clothingTDBId)
 	
-	local transmog = false
 	local lastItemId = nil
 	local lastTransmogId = nil
 
 	Observe("MotorcycleComponent", "OnMountingEvent", function ()
 		local player, transactionSystem, playerData = getMetadata()
 
-		transmog = playerData:IsVisualSetActive()
 		lastItemId = playerData:GetItemInEquipSlot(slot, 0)
-
-		if transmog then
-			lastTransmogId = playerData:GetVisualItemInSlot(slot)
-			playerData:UnequipVisuals(slot)
-		end
-
+		lastTransmogId = playerData:GetVisualItemInSlot(slot)
+			
+		playerData:UnequipVisuals(slot)
 		transactionSystem:GiveItem(player, clothingItemId, 1)
 		playerData:EquipItem(clothingItemId)
 	end)
@@ -39,13 +34,8 @@ registerForEvent("onInit", function ()
 	Observe("MotorcycleComponent", "OnUnmountingEvent", function ()
 		local player, transactionSystem, playerData = getMetadata()
 		
-		playerData:UnequipItem(clothingItemId)
-		transactionSystem:RemoveItem(player, clothingItemId, 1)
-		
-		if transmog then
-			playerData:EquipVisuals(lastTransmogId)
-		end
-
 		playerData:EquipItem(lastItemId)
+		transactionSystem:RemoveItem(player, clothingItemId, 1)
+		playerData:EquipVisuals(lastTransmogId)
 	end)
 end)
