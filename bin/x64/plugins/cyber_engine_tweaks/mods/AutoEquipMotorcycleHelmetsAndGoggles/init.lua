@@ -12,6 +12,11 @@ function getMetadata()
 	return player, transactionSystem, playerData
 end
 
+function onBike()
+	local vehicleTDBId = TDBID.ToStringDEBUG(Game.GetMountedVehicle(GetPlayer()):GetTDBID())
+	return string.find(vehicleTDBId, "sportbike", 1) ~= nil
+end
+
 registerForEvent("onInit", function ()
 	local config = file.readJSON("config.json")
 	local clothingTDBId, slot = config["TDBId"], config["slot"]
@@ -19,23 +24,31 @@ registerForEvent("onInit", function ()
 	
 	local lastItemId = nil
 	local lastTransmogId = nil
+	local wasOnBike = false
 
-	Observe("MotorcycleComponent", "OnMountingEvent", function ()
-		local player, transactionSystem, playerData = getMetadata()
+	Observe("DriveEvents", "OnEnter", function ()
+		if onBike() then
+			local player, transactionSystem, playerData = getMetadata()
 
-		lastItemId = playerData:GetItemInEquipSlot(slot, 0)
-		lastTransmogId = playerData:GetVisualItemInSlot(slot)
-			
-		playerData:UnequipVisuals(slot)
-		transactionSystem:GiveItem(player, clothingItemId, 1)
-		playerData:EquipItem(clothingItemId)
+			lastItemId = playerData:GetItemInEquipSlot(slot, 0)
+			lastTransmogId = playerData:GetVisualItemInSlot(slot)
+			wasOnBike = true
+				
+			transactionSystem:GiveItem(player, clothingItemId, 1)
+			playerData:EquipItem(clothingItemId)
+			playerData:UnequipVisuals(slot)
+		end
 	end)
 
-	Observe("MotorcycleComponent", "OnUnmountingEvent", function ()
-		local player, transactionSystem, playerData = getMetadata()
-		
-		playerData:EquipItem(lastItemId)
-		transactionSystem:RemoveItem(player, clothingItemId, 1)
-		playerData:EquipVisuals(lastTransmogId)
+	Observe("DriveEvents", "OnExit", function ()
+		if wasOnBike then
+			local player, transactionSystem, playerData = getMetadata()
+			
+			wasOnBike = false
+
+			playerData:EquipItem(lastItemId)
+			playerData:EquipVisuals(lastTransmogId)
+			transactionSystem:RemoveItem(player, clothingItemId, 1)
+		end
 	end)
 end)
