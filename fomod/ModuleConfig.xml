@@ -676,6 +676,39 @@
                                 <type name="Optional" />
                             </typeDescriptor>
                         </plugin>
+                        <plugin name="nekohelmet_01 (Requires Neko Cyber-Helmet)">
+                            <description />
+                            <image path="configs/nekohelmet_01/nekohelmet_01.jpg" />
+                            <files>
+                                <folder source="bin" destination="bin" priority="0" />
+                                <folder source="configs/nekohelmet_01/bin" destination="bin" priority="0" />
+                            </files>
+                            <typeDescriptor>
+                                <type name="Optional" />
+                            </typeDescriptor>
+                        </plugin>
+                        <plugin name="nekohelmet_02 (Requires Neko Cyber-Helmet)">
+                            <description />
+                            <image path="configs/nekohelmet_02/nekohelmet_02.jpg" />
+                            <files>
+                                <folder source="bin" destination="bin" priority="0" />
+                                <folder source="configs/nekohelmet_02/bin" destination="bin" priority="0" />
+                            </files>
+                            <typeDescriptor>
+                                <type name="Optional" />
+                            </typeDescriptor>
+                        </plugin>
+                        <plugin name="nekohelmet_03 (Requires Neko Cyber-Helmet)">
+                            <description />
+                            <image path="configs/nekohelmet_03/nekohelmet_03.jpg" />
+                            <files>
+                                <folder source="bin" destination="bin" priority="0" />
+                                <folder source="configs/nekohelmet_03/bin" destination="bin" priority="0" />
+                            </files>
+                            <typeDescriptor>
+                                <type name="Optional" />
+                            </typeDescriptor>
+                        </plugin>
                     </plugins>
                 </group>
             </optionalFileGroups>
