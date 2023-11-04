@@ -27,7 +27,7 @@ registerForEvent("onInit", function ()
 	local wasOnBike = false
 
 	Observe("DriveEvents", "OnEnter", function ()
-		if onBike() then
+		if onBike() and not wasOnBike then
 			local player, transactionSystem, playerData = getMetadata()
 
 			lastItemId = playerData:GetItemInEquipSlot(slot, 0)
@@ -40,7 +40,7 @@ registerForEvent("onInit", function ()
 		end
 	end)
 
-	Observe("DriveEvents", "OnExit", function ()
+	Observe("MotorcycleComponent", "OnUnmountingEvent", function ()
 		if wasOnBike then
 			local player, transactionSystem, playerData = getMetadata()
 			
