@@ -2,7 +2,7 @@ local file = require("file")
 
 
 function getPlayerData()
-	return Game.GetScriptableSystemsContainer():Get("EquipmentSystem"):GetPlayerData(player)
+	return Game.GetScriptableSystemsContainer():Get("EquipmentSystem"):GetPlayerData(Game.GetPlayer())
 end
 
 function onBike()
