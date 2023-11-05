@@ -1,15 +1,8 @@
 local file = require("file")
 
-function getMetadata()
-	local player = Game.GetPlayer()
-	local transactionSystem = Game.GetTransactionSystem()
-	local scriptableSystemsContainer = Game.GetScriptableSystemsContainer()
-	
-	local playerData = scriptableSystemsContainer:Get("EquipmentSystem"):GetPlayerData(player)
-	-- local helmetCount = transactionSystem:GetItemQuantity(player, helmetItemId)
-	-- local equippedHelmetTDBId = TDBID.ToStringDEBUG(playerData:GetItemInEquipSlot(17, 0).id)
 
-	return player, transactionSystem, playerData
+function getPlayerData()
+	return Game.GetScriptableSystemsContainer():Get("EquipmentSystem"):GetPlayerData(player)
 end
 
 function onBike()
@@ -17,38 +10,35 @@ function onBike()
 	return string.find(vehicleTDBId, "sportbike", 1) ~= nil
 end
 
+
 registerForEvent("onInit", function ()
 	local config = file.readJSON("config.json")
 	local clothingTDBId, slot = config["TDBId"], config["slot"]
 	local clothingItemId = ItemID.FromTDBID(clothingTDBId)
 	
-	local lastItemId = nil
-	local lastTransmogId = nil
 	local wasOnBike = false
 
 	Observe("DriveEvents", "OnEnter", function ()
 		if onBike() and not wasOnBike then
-			local player, transactionSystem, playerData = getMetadata()
+			local playerData = getPlayerData()
 
-			lastItemId = playerData:GetItemInEquipSlot(slot, 0)
-			lastTransmogId = playerData:GetVisualItemInSlot(slot)
 			wasOnBike = true
-				
-			transactionSystem:GiveItem(player, clothingItemId, 1)
-			playerData:EquipItem(clothingItemId)
-			playerData:UnequipVisuals(slot)
+			
+			playerData:EquipVisuals(clothingItemId)
 		end
 	end)
 
 	Observe("MotorcycleComponent", "OnUnmountingEvent", function ()
 		if wasOnBike then
-			local player, transactionSystem, playerData = getMetadata()
+			local playerData = getPlayerData()
 			
 			wasOnBike = false
 
-			playerData:EquipItem(lastItemId)
-			playerData:EquipVisuals(lastTransmogId)
-			transactionSystem:RemoveItem(player, clothingItemId, 1)
+			if playerData:IsVisualSetActive() then
+				playerData:EquipWardrobeSet(playerData:GetActiveWardrobeSet().setID)
+			else
+				playerData:ChangeAppearanceToItem(playerData:GetItemInEquipSlot(slot, 0))
+			end
 		end
 	end)
 end)
