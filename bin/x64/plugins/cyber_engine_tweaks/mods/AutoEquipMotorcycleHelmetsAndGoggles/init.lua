@@ -1,6 +1,11 @@
 local file = require("file")
 
 
+COMPATIBLE_VEHICLE_TDBIDS = {
+	["Vehicle.bmw_s1000rr"] = true
+}
+
+
 function getPlayerData()
 	return Game.GetScriptableSystemsContainer():Get("EquipmentSystem"):GetPlayerData(Game.GetPlayer())
 end
@@ -20,9 +25,13 @@ function getEquippedOutfit()
 	return nil
 end
 
+function isBike(TDBId)
+	return string.find(TDBId, "sportbike", 1) or COMPATIBLE_VEHICLE_TDBIDS[TDBId]
+end
+
 function isOnBike()
 	local vehicleTDBId = TDBID.ToStringDEBUG(Game.GetMountedVehicle(Game.GetPlayer()):GetTDBID())
-	return string.find(vehicleTDBId, "sportbike", 1) ~= nil
+	return isBike(vehicleTDBId)
 end
 
 
