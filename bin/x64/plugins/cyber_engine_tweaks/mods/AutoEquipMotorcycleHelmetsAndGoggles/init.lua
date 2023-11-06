@@ -5,6 +5,21 @@ function getPlayerData()
 	return Game.GetScriptableSystemsContainer():Get("EquipmentSystem"):GetPlayerData(Game.GetPlayer())
 end
 
+function getOutfitSystem()
+	return Game.GetScriptableSystemsContainer():Get("EquipmentEx.OutfitSystem")
+end
+
+function getEquippedOutfit()
+	local outfitSystem = getOutfitSystem()
+	local outfits = outfitSystem:GetOutfits()
+
+	for k, v in pairs(outfits) do
+		if outfitSystem:IsEquipped(v) then return v end
+	end
+
+	return nil
+end
+
 function isOnBike()
 	local vehicleTDBId = TDBID.ToStringDEBUG(Game.GetMountedVehicle(Game.GetPlayer()):GetTDBID())
 	return string.find(vehicleTDBId, "sportbike", 1) ~= nil
@@ -18,14 +33,21 @@ registerForEvent("onInit", function ()
 	
 	local wasOnBike = false
 	local lastItemId = nil
+	local lastOutfitCName = nil
 
 	Observe("DriveEvents", "OnEnter", function ()
 		if isOnBike() and not wasOnBike then
-			local transactionSystem, player, playerData = Game.GetTransactionSystem(), Game.GetPlayer(), getPlayerData()
+			local transactionSystem, outfitSystem = Game.GetTransactionSystem(), getOutfitSystem()
+			local player, playerData = Game.GetPlayer(), getPlayerData()
 
 			wasOnBike = true
 			
 			if playerData:IsVisualSetActive() then
+				if outfitSystem then
+					lastOutfitCName = getEquippedOutfit()
+					outfitSystem:EquipItem(clothingItemId)
+				end
+
 				playerData:EquipVisuals(clothingItemId)
 			else
 				lastItemId = playerData:GetItemInEquipSlot(slot, 0)
@@ -38,12 +60,18 @@ registerForEvent("onInit", function ()
 
 	Observe("MotorcycleComponent", "OnUnmountingEvent", function ()
 		if wasOnBike then
-			local transactionSystem, player, playerData = Game.GetTransactionSystem(), Game.GetPlayer(), getPlayerData()
-			
+			local transactionSystem, outfitSystem = Game.GetTransactionSystem(), getOutfitSystem()
+			local player, playerData = Game.GetPlayer(), getPlayerData()
+
 			wasOnBike = false
 
 			if playerData:IsVisualSetActive() then
-				playerData:EquipWardrobeSet(playerData:GetActiveWardrobeSet().setID)
+				if outfitSystem then
+					playerData:UnequipVisuals(slot)
+					outfitSystem:LoadOutfit(lastOutfitCName)
+				else
+					playerData:EquipWardrobeSet(playerData:GetActiveWardrobeSet().setID)
+				end
 			else
 				playerData:EquipItem(lastItemId)
 				transactionSystem:RemoveItem(player, clothingItemId, 1)
