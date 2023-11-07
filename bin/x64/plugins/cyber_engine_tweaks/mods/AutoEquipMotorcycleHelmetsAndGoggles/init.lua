@@ -19,19 +19,28 @@ function getEquippedOutfit()
 	local outfits = outfitSystem:GetOutfits()
 
 	for k, v in pairs(outfits) do
-		if outfitSystem:IsEquipped(v) then return v end
+		if outfitSystem:IsEquipped(v) then
+			return v
+		end
 	end
 
 	return nil
 end
 
 function isBike(TDBId)
-	return string.find(TDBId, "sportbike", 1) or COMPATIBLE_VEHICLE_TDBIDS[TDBId]
+	return string.find(TDBId, "sportbike", 1) ~= nil
 end
 
 function isOnBike()
-	local vehicleTDBId = TDBID.ToStringDEBUG(Game.GetMountedVehicle(Game.GetPlayer()):GetTDBID())
-	return isBike(vehicleTDBId)
+	local mountedVehicle = Game.GetMountedVehicle(Game.GetPlayer())
+	
+	if not mountedVehicle then
+		return false
+	end
+	
+	local vehicleTDBId = TDBID.ToStringDEBUG(mountedVehicle:GetTDBID())
+
+	return isBike(vehicleTDBId) or COMPATIBLE_VEHICLE_TDBIDS[vehicleTDBId]
 end
 
 
@@ -41,49 +50,77 @@ registerForEvent("onInit", function ()
 	local clothingItemId = ItemID.FromTDBID(clothingTDBId)
 	
 	local wasOnBike = false
-	local lastItemId = nil
-	local lastOutfitCName = nil
+	local wasTransmog = false
+
+	local lastOutfit = nil
+	local lastHeadItem = nil
+	local lastWreathItem = nil
+
+	Observe("EquipmentSystemPlayerData", "OnRestored", function()
+		if isOnBike() then
+			local transactionSystem, outfitSystem = Game.GetTransactionSystem(), getOutfitSystem()
+			local player, playerData = Game.GetPlayer(), getPlayerData()
+			
+			wasOnBike = true
+		
+			outfitSystem:EquipItem(clothingItemId)
+			playerData:EquipVisuals(clothingItemId)
+		end
+	end)
 
 	Observe("DriveEvents", "OnEnter", function ()
 		if isOnBike() and not wasOnBike then
+			-- print('Mounting...')
 			local transactionSystem, outfitSystem = Game.GetTransactionSystem(), getOutfitSystem()
 			local player, playerData = Game.GetPlayer(), getPlayerData()
-
-			wasOnBike = true
 			
-			if playerData:IsVisualSetActive() then
-				if outfitSystem then
-					lastOutfitCName = getEquippedOutfit()
-					outfitSystem:EquipItem(clothingItemId)
-				end
+			wasOnBike = true
+			wasTransmog = playerData:IsVisualSetActive()
 
-				playerData:EquipVisuals(clothingItemId)
-			else
-				lastItemId = playerData:GetItemInEquipSlot(slot, 0)
-				transactionSystem:GiveItem(player, clothingItemId, 1)
-				playerData:EquipItem(clothingItemId)
-				playerData:UnequipVisuals(slot)
+			lastOutfit = getEquippedOutfit()
+			lastHeadItem = transactionSystem:GetItemInSlot(player, "OutfitSlots.Head")
+			lastWreathItem = transactionSystem:GetItemInSlot(player, "OutfitSlots.Wreath")
+
+			if lastHeadItem then
+				lastHeadItem = lastHeadItem:GetItemID()
 			end
+
+			if lastWreathItem then
+				lastWreathItem = lastWreathItem:GetItemID()
+				outfitSystem:DetachVisualFromSlot(lastWreathItem, "OutfitSlots.Wreath")
+			end
+			
+			outfitSystem:EquipItem(clothingItemId)
+			playerData:EquipVisuals(clothingItemId)
 		end
 	end)
 
 	Observe("MotorcycleComponent", "OnUnmountingEvent", function ()
 		if wasOnBike then
+			-- print('Unmounting...')
 			local transactionSystem, outfitSystem = Game.GetTransactionSystem(), getOutfitSystem()
 			local player, playerData = Game.GetPlayer(), getPlayerData()
 
 			wasOnBike = false
+		
+			playerData:UnequipVisuals(slot)
 
-			if playerData:IsVisualSetActive() then
-				if outfitSystem then
-					playerData:UnequipVisuals(slot)
-					outfitSystem:LoadOutfit(lastOutfitCName)
-				else
-					playerData:EquipWardrobeSet(playerData:GetActiveWardrobeSet().setID)
-				end
+			if lastOutfit then
+				outfitSystem:LoadOutfit(lastOutfit)
 			else
-				playerData:EquipItem(lastItemId)
-				transactionSystem:RemoveItem(player, clothingItemId, 1)
+				outfitSystem:UnequipItem(clothingItemId)
+
+				if wasTransmog then
+					if lastHeadItem then
+						outfitSystem:EquipItem(lastHeadItem)
+					end
+
+					if lastWreathItem then
+						outfitSystem:AttachVisualToSlot(lastWreathItem, "OutfitSlots.Wreath")
+					end
+				else
+					outfitSystem:Deactivate()
+				end
 			end
 		end
 	end)
