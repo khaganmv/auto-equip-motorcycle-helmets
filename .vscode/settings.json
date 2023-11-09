@@ -5,6 +5,7 @@
         "ItemID",
         "registerForEvent",
         "Observe",
-        "json"
+        "json",
+        "ObserveAfter"
     ]
 }

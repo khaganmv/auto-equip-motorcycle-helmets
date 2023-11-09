@@ -9,11 +9,6 @@ COMPATIBLE_SLOT_TDBIDS = {
 	"OutfitSlots.Wreath",
 }
 
-COMPATIBLE_VEHICLE_TDBIDS = {
-	["Vehicle.bmw_s1000rr"] = true,
-	["Vehicle.bmw_s1000rr_purchasable"] = true
-}
-
 
 local function getPlayerData()
 	return Game.GetScriptableSystemsContainer():Get("EquipmentSystem"):GetPlayerData(Game.GetPlayer())
@@ -27,29 +22,23 @@ local function getEquippedOutfit()
 	local outfitSystem = getOutfitSystem()
 	local outfits = outfitSystem:GetOutfits()
 
-	for k, v in pairs(outfits) do
-		if outfitSystem:IsEquipped(v) then
-			return v
+	for _, outfit in pairs(outfits) do
+		if outfitSystem:IsEquipped(outfit) then
+			return outfit
 		end
 	end
 
 	return nil
 end
 
-local function isBike(TDBId)
-	return string.find(TDBId, "sportbike", 1) ~= nil
-end
-
 local function isOnBike()
 	local mountedVehicle = Game.GetMountedVehicle(Game.GetPlayer())
-	
+
 	if not mountedVehicle then
 		return false
 	end
-	
-	local vehicleTDBId = TDBID.ToStringDEBUG(mountedVehicle:GetTDBID())
 
-	return isBike(vehicleTDBId) or COMPATIBLE_VEHICLE_TDBIDS[vehicleTDBId]
+	return mountedVehicle:IsA("vehicleBikeBaseObject")
 end
 
 local function newState(wasOnBike, wasTransmog, lastOutfit, lastItems)
@@ -61,28 +50,13 @@ local function newState(wasOnBike, wasTransmog, lastOutfit, lastItems)
 	}
 end
 
--- local function printState(state)
--- 	print("wasOnBike: ", tostring(state.wasOnBike))
--- 	print("wasTransmog: ", tostring(state.wasTransmog))
-	
--- 	if state.lastOutfit then
--- 		print("lastOutfit: ", tostring(state.lastOutfit))
--- 	else 
--- 		print("lastOutfit: nil")
--- 	end
-	
--- 	for slot, item in pairs(state.lastItems) do
-		
--- 	end
--- end
-
 local function getSlottedItems()
 	local items = {}
 	local player, transactionSystem = Game.GetPlayer(), Game.GetTransactionSystem()
 
-	for i, slot in ipairs(COMPATIBLE_SLOT_TDBIDS) do
+	for _, slot in ipairs(COMPATIBLE_SLOT_TDBIDS) do
 		local item = transactionSystem:GetItemInSlot(player, slot)
-		
+
 		if item then
 			items[slot] = item:GetItemID()
 		end
@@ -93,8 +67,8 @@ end
 
 local function equipItems(items)
 	local outfitSystem = getOutfitSystem()
-	
-	for i, slot in ipairs(COMPATIBLE_SLOT_TDBIDS) do
+
+	for _, slot in ipairs(COMPATIBLE_SLOT_TDBIDS) do
 		if items[slot] then
 			outfitSystem:EquipItem(items[slot])
 		end
@@ -103,8 +77,8 @@ end
 
 local function unequipItems(items)
 	local outfitSystem = getOutfitSystem()
-	
-	for i, slot in ipairs(COMPATIBLE_SLOT_TDBIDS) do
+
+	for _, slot in ipairs(COMPATIBLE_SLOT_TDBIDS) do
 		if items[slot] then
 			outfitSystem:UnequipItem(items[slot])
 		end
@@ -116,7 +90,7 @@ registerForEvent("onInit", function ()
 	local config = file.readJSON("config.json")
 	local clothingTDBId, slot = config["TDBId"], config["slot"]
 	local clothingItemId = ItemID.FromTDBID(clothingTDBId)
-	
+
 	local state = {
 		wasOnBike = false,
 		wasTransmog = false,
@@ -126,7 +100,7 @@ registerForEvent("onInit", function ()
 
 	ObserveAfter("EquipmentSystemPlayerData", "OnRestored", function()
 		local playerData, outfitSystem = getPlayerData(), getOutfitSystem()
-		
+
 		state = newState(isOnBike(), playerData:IsVisualSetActive(), nil, getSlottedItems())
 
 		if state.wasOnBike then
@@ -137,10 +111,8 @@ registerForEvent("onInit", function ()
 
 	ObserveAfter("DriveEvents", "OnEnter", function ()
 		if isOnBike() and not state.wasOnBike then
-			print('[ AEMHnG ] Mounting...')
-			
 			local playerData, outfitSystem = getPlayerData(), getOutfitSystem()
-			
+
 			state = newState(true, playerData:IsVisualSetActive(), getEquippedOutfit(), getSlottedItems())
 			unequipItems(state.lastItems)
 			outfitSystem:EquipItem(clothingItemId)
@@ -150,10 +122,8 @@ registerForEvent("onInit", function ()
 
 	Observe("MotorcycleComponent", "OnUnmountingEvent", function ()
 		if state.wasOnBike then
-			print('[ AEMHnG ] Unmounting...')
-
 			local outfitSystem = getOutfitSystem()
-			
+
 			state.wasOnBike = false
 			outfitSystem:UnequipItem(clothingItemId)
 
