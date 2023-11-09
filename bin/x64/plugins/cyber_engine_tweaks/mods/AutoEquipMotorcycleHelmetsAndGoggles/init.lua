@@ -1,8 +1,17 @@
 local file = require("file")
 
 
+COMPATIBLE_SLOT_TDBIDS = {
+	"OutfitSlots.Head",
+	"OutfitSlots.Balaclava",
+	"OutfitSlots.Mask",
+	"OutfitSlots.Glasses",
+	"OutfitSlots.Wreath",
+}
+
 COMPATIBLE_VEHICLE_TDBIDS = {
-	["Vehicle.bmw_s1000rr"] = true
+	["Vehicle.bmw_s1000rr"] = true,
+	["Vehicle.bmw_s1000rr_purchasable"] = true
 }
 
 
@@ -43,36 +52,62 @@ local function isOnBike()
 	return isBike(vehicleTDBId) or COMPATIBLE_VEHICLE_TDBIDS[vehicleTDBId]
 end
 
-local function newState(wasOnBike, wasTransmog, lastOutfit, lastHeadItem, lastWreathItem)
-	return { 
-		wasOnBike = wasOnBike, 
-		wasTransmog = wasTransmog, 
+local function newState(wasOnBike, wasTransmog, lastOutfit, lastItems)
+	return {
+		wasOnBike = wasOnBike,
+		wasTransmog = wasTransmog,
 		lastOutfit = lastOutfit,
-		lastHeadItem = lastHeadItem,  
-		lastWreathItem = lastWreathItem 
+		lastItems = lastItems
 	}
 end
 
-local function printState(state)
-	print("wasOnBike: ", tostring(state.wasOnBike))
-	print("wasTransmog: ", tostring(state.wasTransmog))
+-- local function printState(state)
+-- 	print("wasOnBike: ", tostring(state.wasOnBike))
+-- 	print("wasTransmog: ", tostring(state.wasTransmog))
 	
-	if state.lastOutfit then 
-		print("lastOutfit: ", tostring(state.lastOutfit)) 
-	else 
-		print("lastOutfit: nil") 
+-- 	if state.lastOutfit then
+-- 		print("lastOutfit: ", tostring(state.lastOutfit))
+-- 	else 
+-- 		print("lastOutfit: nil")
+-- 	end
+	
+-- 	for slot, item in pairs(state.lastItems) do
+		
+-- 	end
+-- end
+
+local function getSlottedItems()
+	local items = {}
+	local player, transactionSystem = Game.GetPlayer(), Game.GetTransactionSystem()
+
+	for i, slot in ipairs(COMPATIBLE_SLOT_TDBIDS) do
+		local item = transactionSystem:GetItemInSlot(player, slot)
+		
+		if item then
+			items[slot] = item:GetItemID()
+		end
 	end
+
+	return items
+end
+
+local function equipItems(items)
+	local outfitSystem = getOutfitSystem()
 	
-	if state.lastHeadItem then 
-		print("lastHeadItem: ", tostring(state.lastHeadItem)) 
-	else 
-		print("lastHeadItem: nil") 
+	for i, slot in ipairs(COMPATIBLE_SLOT_TDBIDS) do
+		if items[slot] then
+			outfitSystem:EquipItem(items[slot])
+		end
 	end
+end
+
+local function unequipItems(items)
+	local outfitSystem = getOutfitSystem()
 	
-	if state.lastWreathItem then 
-		print("lastWreathItem: ", tostring(state.lastWreathItem)) 
-	else 
-		print("lastWreathItem: nil") 
+	for i, slot in ipairs(COMPATIBLE_SLOT_TDBIDS) do
+		if items[slot] then
+			outfitSystem:UnequipItem(items[slot])
+		end
 	end
 end
 
@@ -86,90 +121,52 @@ registerForEvent("onInit", function ()
 		wasOnBike = false,
 		wasTransmog = false,
 		lastOutfit = nil,
-		lastHeadItem = nil,
-		lastWreathItem = nil
+		lastItems = {}
 	}
 
-	Observe("EquipmentSystemPlayerData", "OnRestored", function()
-		if isOnBike() then
-			print('[ AEMHnG ] Mounted...')
-			local transactionSystem, outfitSystem = Game.GetTransactionSystem(), getOutfitSystem()
-			local player, playerData = Game.GetPlayer(), getPlayerData()
-			
-			-- printState(state)
-
-			state = newState(true, playerData:IsVisualSetActive(), nil, nil, nil)
+	ObserveAfter("EquipmentSystemPlayerData", "OnRestored", function()
+		local playerData, outfitSystem = getPlayerData(), getOutfitSystem()
 		
-			-- printState(state)
+		state = newState(isOnBike(), playerData:IsVisualSetActive(), nil, getSlottedItems())
 
+		if state.wasOnBike then
 			outfitSystem:EquipItem(clothingItemId)
-			playerData:EquipVisuals(clothingItemId)
+			outfitSystem:AttachAllVisualsToSlots(true)
 		end
 	end)
 
-	Observe("DriveEvents", "OnEnter", function ()
+	ObserveAfter("DriveEvents", "OnEnter", function ()
 		if isOnBike() and not state.wasOnBike then
 			print('[ AEMHnG ] Mounting...')
-			local transactionSystem, outfitSystem = Game.GetTransactionSystem(), getOutfitSystem()
-			local player, playerData = Game.GetPlayer(), getPlayerData()
 			
-			-- printState(state)
-
-			state = newState(
-				true,
-				playerData:IsVisualSetActive(),
-				getEquippedOutfit(),
-				transactionSystem:GetItemInSlot(player, "OutfitSlots.Head"),
-				transactionSystem:GetItemInSlot(player, "OutfitSlots.Wreath")
-			)
-
-			if state.lastHeadItem then
-				state.lastHeadItem = state.lastHeadItem:GetItemID()
-			end
-
-			if state.lastWreathItem then
-				state.lastWreathItem = state.lastWreathItem:GetItemID()
-				outfitSystem:DetachVisualFromSlot(state.lastWreathItem, "OutfitSlots.Wreath")
-			end
-
-			-- printState(state)
+			local playerData, outfitSystem = getPlayerData(), getOutfitSystem()
 			
+			state = newState(true, playerData:IsVisualSetActive(), getEquippedOutfit(), getSlottedItems())
+			unequipItems(state.lastItems)
 			outfitSystem:EquipItem(clothingItemId)
-			playerData:EquipVisuals(clothingItemId)
+			outfitSystem:AttachAllVisualsToSlots(true)
 		end
 	end)
 
 	Observe("MotorcycleComponent", "OnUnmountingEvent", function ()
 		if state.wasOnBike then
 			print('[ AEMHnG ] Unmounting...')
-			local transactionSystem, outfitSystem = Game.GetTransactionSystem(), getOutfitSystem()
-			local player, playerData = Game.GetPlayer(), getPlayerData()
 
-			-- printState(state)
-
+			local outfitSystem = getOutfitSystem()
+			
 			state.wasOnBike = false
-		
-			playerData:UnequipVisuals(slot)
+			outfitSystem:UnequipItem(clothingItemId)
 
 			if state.lastOutfit then
 				outfitSystem:LoadOutfit(state.lastOutfit)
 			else
-				outfitSystem:UnequipItem(clothingItemId)
-
 				if state.wasTransmog then
-					if state.lastHeadItem then
-						outfitSystem:EquipItem(state.lastHeadItem)
-					end
-
-					if state.lastWreathItem then
-						outfitSystem:AttachVisualToSlot(state.lastWreathItem, "OutfitSlots.Wreath")
-					end
+					equipItems(state.lastItems)
+					outfitSystem:AttachAllVisualsToSlots(true)
 				else
 					outfitSystem:Deactivate()
 				end
 			end
-
-			-- printState(state)
 		end
 	end)
 end)
