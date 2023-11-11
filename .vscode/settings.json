@@ -6,6 +6,7 @@
         "registerForEvent",
         "Observe",
         "json",
-        "ObserveAfter"
+        "ObserveAfter",
+        "ObserveBefore"
     ]
 }

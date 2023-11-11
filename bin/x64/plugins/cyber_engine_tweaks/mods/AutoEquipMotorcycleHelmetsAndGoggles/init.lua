@@ -65,6 +65,13 @@ local function getSlottedItems()
 	return items
 end
 
+local function equipItem(item)
+	local outfitSystem = getOutfitSystem()
+
+	outfitSystem:EquipItem(item)
+	outfitSystem:AttachAllVisualsToSlots(true)
+end
+
 local function equipItems(items)
 	local outfitSystem = getOutfitSystem()
 
@@ -98,25 +105,23 @@ registerForEvent("onInit", function ()
 		lastItems = {}
 	}
 
-	ObserveAfter("EquipmentSystemPlayerData", "OnRestored", function()
-		local playerData, outfitSystem = getPlayerData(), getOutfitSystem()
+	ObserveAfter("EquipmentSystemPlayerData", "OnRestored", function ()
+		local playerData = getPlayerData()
 
 		state = newState(isOnBike(), playerData:IsVisualSetActive(), nil, getSlottedItems())
 
 		if state.wasOnBike then
-			outfitSystem:EquipItem(clothingItemId)
-			outfitSystem:AttachAllVisualsToSlots(true)
+			equipItem(clothingItemId)
 		end
 	end)
 
-	ObserveAfter("DriveEvents", "OnEnter", function ()
+	ObserveBefore("VehicleComponent", "OnVehicleCameraChange", function ()
 		if isOnBike() and not state.wasOnBike then
-			local playerData, outfitSystem = getPlayerData(), getOutfitSystem()
+			local playerData = getPlayerData()
 
 			state = newState(true, playerData:IsVisualSetActive(), getEquippedOutfit(), getSlottedItems())
 			unequipItems(state.lastItems)
-			outfitSystem:EquipItem(clothingItemId)
-			outfitSystem:AttachAllVisualsToSlots(true)
+			equipItem(clothingItemId)
 		end
 	end)
 
