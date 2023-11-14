@@ -1,5 +1,6 @@
 file = {}
 
+
 function file.fileExists(filePath)
     local f = io.open(filePath, "r")
     if f == nil then return false end
@@ -32,5 +33,6 @@ function file.updateJSON(filePath, data)
 
     file.writeJSON(filePath, d)
 end
+
 
 return file

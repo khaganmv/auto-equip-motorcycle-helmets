@@ -29,10 +29,7 @@ for i, m in zip(images, metadata):
     if not os.path.isdir(CONFIGS_DIR + subdir + BIN_DIR):
         os.makedirs(CONFIGS_DIR + subdir + BIN_DIR)
     
-    config = {
-        "TDBId": m,
-        "slot": 11 if 'Glasses' in m else 17
-    }
+    config = [m]
     
     with open(CONFIGS_DIR + subdir + BIN_DIR + 'config.json', 'w') as cf:
         json.dump(config, cf, indent=4)

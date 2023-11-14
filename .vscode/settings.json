@@ -7,6 +7,7 @@
         "Observe",
         "json",
         "ObserveAfter",
-        "ObserveBefore"
+        "ObserveBefore",
+        "registerInput"
     ]
 }

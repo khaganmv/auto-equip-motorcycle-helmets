@@ -1,2 +1,4 @@
 auto-equip-motorcycle-helmets-and-goggles.zip
 images/*.png
+scripts/deploy.py
+TEST.md
