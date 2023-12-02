@@ -1,5 +1,10 @@
+Util = require("modules/util")
+
+
 State = {}
 State.__index = State
+
+
 
 
 function State.new()
@@ -15,6 +20,15 @@ function State.new()
     return self
 end
 
+
+function State:update()
+    self.wasOnBike = Util.isOnBike()
+    self.wasTransmog = Util.isTransmog()
+    self.lastOutfit = Util.getLastOutfit()
+    self.lastItems = Util.getLastItems()
+end
+
+
 function State:reset()
     self.wasOnBike = false
     self.wasTransmog = false
@@ -22,6 +36,8 @@ function State:reset()
     self.lastOutfit = nil
     self.lastItems = {}
 end
+
+
 
 
 return State
