@@ -47,11 +47,11 @@ for m in metadata:
     name = subdir[:-1]
     
     if 'xrxbiker' in subdir:
-        name += ' (Requires XRX Helmet)'
+        name += ' (Requires the XRX Helmet mod)'
     elif 'cathelm' in subdir:
-        name += ' (Requires CatEars Helmet)'
+        name += ' (Requires the CatEars Helmet mod)'
     elif 'nekohelm' in subdir:
-        name += ' (Requires Neko Cyber-Helmet)'
+        name += ' (Requires the Neko Cyber-Helmet mod)'
     
     plugin = ET.SubElement(opts, 'plugin', {'name': name})
     ET.SubElement(plugin, 'description')

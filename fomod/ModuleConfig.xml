@@ -588,7 +588,7 @@
                                 <type name="Optional" />
                             </typeDescriptor>
                         </plugin>
-                        <plugin name="xrxbiker_xr (Requires XRX Helmet)">
+                        <plugin name="xrxbiker_xr (Requires the XRX Helmet mod)">
                             <description />
                             <image path="configs/xrxbiker_xr/xrxbiker_xr.jpg" />
                             <files>
@@ -621,7 +621,7 @@
                                 <type name="Optional" />
                             </typeDescriptor>
                         </plugin>
-                        <plugin name="cathelm_a (Requires CatEars Helmet)">
+                        <plugin name="cathelm_a (Requires the CatEars Helmet mod)">
                             <description />
                             <image path="configs/cathelm_a/cathelm_a.jpg" />
                             <files>
@@ -632,7 +632,7 @@
                                 <type name="Optional" />
                             </typeDescriptor>
                         </plugin>
-                        <plugin name="cathelm_b (Requires CatEars Helmet)">
+                        <plugin name="cathelm_b (Requires the CatEars Helmet mod)">
                             <description />
                             <image path="configs/cathelm_b/cathelm_b.jpg" />
                             <files>
@@ -643,7 +643,7 @@
                                 <type name="Optional" />
                             </typeDescriptor>
                         </plugin>
-                        <plugin name="cathelm_c (Requires CatEars Helmet)">
+                        <plugin name="cathelm_c (Requires the CatEars Helmet mod)">
                             <description />
                             <image path="configs/cathelm_c/cathelm_c.jpg" />
                             <files>
@@ -654,7 +654,7 @@
                                 <type name="Optional" />
                             </typeDescriptor>
                         </plugin>
-                        <plugin name="cathelm_d (Requires CatEars Helmet)">
+                        <plugin name="cathelm_d (Requires the CatEars Helmet mod)">
                             <description />
                             <image path="configs/cathelm_d/cathelm_d.jpg" />
                             <files>
@@ -665,7 +665,7 @@
                                 <type name="Optional" />
                             </typeDescriptor>
                         </plugin>
-                        <plugin name="cathelm_e (Requires CatEars Helmet)">
+                        <plugin name="cathelm_e (Requires the CatEars Helmet mod)">
                             <description />
                             <image path="configs/cathelm_e/cathelm_e.jpg" />
                             <files>
@@ -676,7 +676,7 @@
                                 <type name="Optional" />
                             </typeDescriptor>
                         </plugin>
-                        <plugin name="nekohelmet_01 (Requires Neko Cyber-Helmet)">
+                        <plugin name="nekohelmet_01 (Requires the Neko Cyber-Helmet mod)">
                             <description />
                             <image path="configs/nekohelmet_01/nekohelmet_01.jpg" />
                             <files>
@@ -687,7 +687,7 @@
                                 <type name="Optional" />
                             </typeDescriptor>
                         </plugin>
-                        <plugin name="nekohelmet_02 (Requires Neko Cyber-Helmet)">
+                        <plugin name="nekohelmet_02 (Requires the Neko Cyber-Helmet mod)">
                             <description />
                             <image path="configs/nekohelmet_02/nekohelmet_02.jpg" />
                             <files>
@@ -698,12 +698,23 @@
                                 <type name="Optional" />
                             </typeDescriptor>
                         </plugin>
-                        <plugin name="nekohelmet_03 (Requires Neko Cyber-Helmet)">
+                        <plugin name="nekohelmet_03 (Requires the Neko Cyber-Helmet mod)">
                             <description />
                             <image path="configs/nekohelmet_03/nekohelmet_03.jpg" />
                             <files>
                                 <folder source="bin" destination="bin" priority="0" />
                                 <folder source="configs/nekohelmet_03/bin" destination="bin" priority="0" />
+                            </files>
+                            <typeDescriptor>
+                                <type name="Optional" />
+                            </typeDescriptor>
+                        </plugin>
+                        <plugin name="nekohelmet_04 (Requires the Neko Cyber-Helmet mod)">
+                            <description />
+                            <image path="configs/nekohelmet_04/nekohelmet_04.jpg" />
+                            <files>
+                                <folder source="bin" destination="bin" priority="0" />
+                                <folder source="configs/nekohelmet_04/bin" destination="bin" priority="0" />
                             </files>
                             <typeDescriptor>
                                 <type name="Optional" />
